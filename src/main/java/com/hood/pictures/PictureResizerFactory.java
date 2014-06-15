@@ -1,6 +1,9 @@
 package com.hood.pictures;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
@@ -13,10 +16,31 @@ public class PictureResizerFactory
     public PictureResizer createFromCommandLine( final CommandLine commandLine ) throws Exception
     {
         final int height;
-        final String[] inputDirectories;
-        final String outputDirectory;
+        final List<String> inputDirectories = new ArrayList<>();
+        String outputDirectory;
         final int width;
-        final String[] extensions;
+        final List<String> extensions = new ArrayList<>();
+
+        inputDirectories.addAll( Arrays.asList( commandLine.getOptionValues( Arguments.INPUT_DIRECTORY ).clone() ) );
+        outputDirectory = commandLine.getOptionValue( Arguments.OUTPUT_DIRECTORY );
+        new File( outputDirectory ).mkdirs();
+
+        if ( inputDirectories.contains( outputDirectory ) )
+        {
+            logger.error( "The output directory \"{}\" is included in the inputDirectories {}.  This will overwrite pictures!",
+                          outputDirectory,
+                          inputDirectories );
+            throw new IllegalArgumentException( "Output directory cannot also be an input directory!" );
+        }
+
+        if ( commandLine.hasOption( Arguments.EXTENSION ) )
+        {
+            extensions.addAll( Arrays.asList( commandLine.getOptionValues( Arguments.EXTENSION ).clone() ) );
+        }
+        else
+        {
+            extensions.addAll( Defaults.EXTENSIONS );
+        }
 
         if ( commandLine.hasOption( Arguments.HEIGHT ) )
         {
@@ -27,26 +51,6 @@ public class PictureResizerFactory
             height = Defaults.HEIGHT;
         }
 
-        if ( commandLine.hasOption( Arguments.INPUT_DIRECTORY ) )
-        {
-            inputDirectories = commandLine.getOptionValues( Arguments.INPUT_DIRECTORY ).clone();
-        }
-        else
-        {
-            logger.error( "Input Directory(ies) must be specified!" );
-            throw new Exception( "Input Directory(ies) not specified!" );
-        }
-
-        if ( commandLine.hasOption( Arguments.OUTPUT_DIRECTORY ) )
-        {
-            outputDirectory = commandLine.getOptionValue( Arguments.OUTPUT_DIRECTORY );
-            new File( outputDirectory ).mkdirs();
-        }
-        else
-        {
-            outputDirectory = inputDirectories[0];
-        }
-
         if ( commandLine.hasOption( Arguments.WIDTH ) )
         {
             width = Integer.parseInt( commandLine.getOptionValue( Arguments.WIDTH ) );
@@ -54,15 +58,6 @@ public class PictureResizerFactory
         else
         {
             width = Defaults.WIDTH;
-        }
-
-        if ( commandLine.hasOption( Arguments.EXTENSION ) )
-        {
-            extensions = commandLine.getOptionValues( Arguments.EXTENSION ).clone();
-        }
-        else
-        {
-            extensions = Defaults.EXTENSIONS;
         }
 
         return new PictureResizer( inputDirectories, extensions, outputDirectory, width, height );

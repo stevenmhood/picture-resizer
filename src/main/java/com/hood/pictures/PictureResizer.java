@@ -7,6 +7,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -24,12 +25,16 @@ public class PictureResizer
     public static void main( final String[] args ) throws Exception
     {
         final CommandLine commandLine = new CommandLineParser().parseCommandLine( args );
+        if ( commandLine == null )
+        {
+            System.exit( 1 );
+        }
         final PictureResizer pictureResizer = new PictureResizerFactory().createFromCommandLine( commandLine );
         pictureResizer.resize();
     }
 
-    private final String[] inputDirectories;
-    private final String[] extensions;
+    private final List<String> inputDirectories;
+    private final List<String> extensions;
     private final String outputDirectory;
     private final int width;
     private final int height;
@@ -48,14 +53,14 @@ public class PictureResizer
      *            Maximum width for resized pictures. This is applied after the maximum
      * @param height
      */
-    public PictureResizer( final String[] inputDirectories,
-                           final String[] extensions,
+    public PictureResizer( final List<String> inputDirectories,
+                           final List<String> extensions,
                            final String outputDirectory,
                            final int width,
                            final int height )
     {
-        this.inputDirectories = inputDirectories.clone();
-        this.extensions = extensions.clone();
+        this.inputDirectories = inputDirectories;
+        this.extensions = extensions;
         this.outputDirectory = outputDirectory;
         this.width = width;
         this.height = height;

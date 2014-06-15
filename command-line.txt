@@ -1,0 +1,1 @@
+S:\Java\projects\PictureResizer>mvn exec:java -Dexec.mainClass=com.hood.pictures.PictureResizer -Dexec.args="-i c:\Hood\Pictures\upload -o c:\Hood\Pictures\upload\thumbs"
